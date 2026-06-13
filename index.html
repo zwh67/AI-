@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoiceCanvas Lite：AI 语音绘图白板</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="stage">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">VoiceCanvas Lite</p>
+            <h1>VoiceCanvas Lite：AI 语音绘图白板</h1>
+            <p class="subtitle">支持基础图形、流程图和教学图示模板的纯语音绘图工具</p>
+          </div>
+          <div class="header-controls">
+            <div id="status" class="status-pill">等待麦克风授权</div>
+            <button id="micButton" class="mic-button" type="button" aria-label="启用麦克风">
+              <span class="mic-dot"></span>
+              <span id="micLabel">启用麦克风</span>
+            </button>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="board" width="1120" height="720" aria-label="教学图示模板画布"></canvas>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="panel-block problem-block">
+          <p class="label">一句话图示生成</p>
+          <textarea id="problemText" class="problem-input" rows="5" placeholder="说出或粘贴绘图意图，例如：画一个前后端框架 / 画一个登录流程图 / 添加短信验证码节点 / 画一个平抛运动讲解图。"></textarea>
+          <div class="problem-actions">
+            <button id="analyzeProblemButton" type="button">理解意图</button>
+            <button id="drawProblemButton" type="button">生成/追加</button>
+          </div>
+          <p id="analysisStatus" class="hint-text">支持生成新图，也支持在当前流程图上继续添加节点。</p>
+        </section>
+        <section class="panel-block ai-summary-block">
+          <p class="label">AI 扩展结果</p>
+          <dl class="ai-summary">
+            <div><dt>原始语音</dt><dd id="aiRawText">-</dd></div>
+            <div><dt>图示摘要</dt><dd id="aiSummary">等待输入</dd></div>
+            <div><dt>解析来源</dt><dd id="aiSource">local</dd></div>
+            <div><dt>执行动作</dt><dd id="aiActionCount">0</dd></div>
+          </dl>
+        </section>
+        <section class="panel-block demo-block">
+          <p class="label">演示模式</p>
+          <div class="demo-actions">
+            <button type="button" data-command="画一个在线购物流程">购物流程</button>
+            <button type="button" data-command="复杂这个流程图">复杂当前图</button>
+            <button type="button" data-command="画一个前后端请求架构图">请求架构</button>
+            <button type="button" data-command="画一个平抛运动讲解图">平抛讲解</button>
+          </div>
+        </section>
+        <section class="panel-block analysis-block secondary-block">
+          <p class="label">图示规划结果</p>
+          <dl class="analysis-summary">
+            <div><dt>类型</dt><dd id="analysisScene">未规划</dd></div>
+            <div><dt>来源</dt><dd id="analysisSource">-</dd></div>
+          </dl>
+          <div class="analysis-section">
+            <p>识别意图</p>
+            <ul id="knowledgeList"></ul>
+          </div>
+          <div class="analysis-section">
+            <p>图示元素</p>
+            <ul id="knownsList"></ul>
+          </div>
+          <div class="analysis-section">
+            <p>生成目标</p>
+            <ul id="goalsList"></ul>
+          </div>
+          <div class="analysis-section">
+            <p>生成步骤</p>
+            <ol id="stepsList"></ol>
+          </div>
+          <div class="analysis-section">
+            <p>图示规划</p>
+            <div id="visualPlan" class="visual-plan">等待题目分析</div>
+          </div>
+          <div class="analysis-section">
+            <p>限制说明</p>
+            <ul id="limitationsList"></ul>
+          </div>
+        </section>
+        <section class="panel-block">
+          <p class="label">最新语音文本</p>
+          <p id="transcript" class="transcript">尚未识别到语音</p>
+        </section>
+        <section class="panel-block secondary-block">
+          <p class="label">执行动作</p>
+          <div id="actions" class="actions"></div>
+        </section>
+        <section class="panel-block log-block">
+          <p class="label">操作日志</p>
+          <ol id="log" class="log-list"></ol>
+        </section>
+        <section class="panel-block compact secondary-block">
+          <p class="label">场景参数</p>
+          <dl class="params">
+            <div><dt>场景</dt><dd id="paramScene">空画布</dd></div>
+            <div><dt>初速度</dt><dd id="paramVelocity">5</dd></div>
+            <div><dt>高度</dt><dd id="paramHeight">3</dd></div>
+            <div><dt>脱离角</dt><dd id="paramAngle">60°</dd></div>
+            <div><dt>质量</dt><dd id="paramMass">2kg</dd></div>
+            <div><dt>外力</dt><dd id="paramForce">10N</dd></div>
+          </dl>
+        </section>
+        <section class="panel-block compact secondary-block">
+          <p class="label">运行模式</p>
+          <dl class="params">
+            <div><dt>解析方式</dt><dd id="runMode">本地规则解析</dd></div>
+            <div><dt>本地解析次数</dt><dd id="parseCount">0</dd></div>
+            <div><dt>AI 调用次数</dt><dd id="aiCalls">0</dd></div>
+          </dl>
+          <p class="hint-text">推荐使用 Chrome / Edge，并允许麦克风权限。首次授权需要点击按钮，这是浏览器安全机制。</p>
+        </section>
+        <section class="panel-block secondary-block">
+          <p class="label">你可以说</p>
+          <ul class="speech-tips">
+            <li>画平抛运动，设置初速度 5，开始模拟</li>
+            <li>分析题目，画出示意图，做受力分析</li>
+            <li>一个质量为 2kg 的物体在光滑水平面上受到 10N 的力</li>
+            <li>画圆周运动，设置脱离角度 60 度</li>
+            <li>画斜面，添加物块，做受力分析</li>
+            <li>暂停、重播、清空画布、撤回上一步</li>
+          </ul>
+        </section>
+        <section class="panel-block secondary-block">
+          <p class="label">调试/兜底控制</p>
+          <div class="debug-controls">
+            <button type="button" data-command="画平抛运动">平抛</button>
+            <button type="button" data-command="画水平面受力 添加物块">水平面</button>
+            <button type="button" data-command="画圆周运动 添加小球">圆周</button>
+            <button type="button" data-command="画斜面 添加物块">斜面</button>
+            <button type="button" data-command="做受力分析">受力</button>
+            <button type="button" data-command="开始模拟">开始</button>
+            <button type="button" data-command="暂停">暂停</button>
+            <button type="button" data-command="重播">重播</button>
+            <button type="button" data-command="清空画布">清空</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

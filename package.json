@@ -1,0 +1,11 @@
+{
+  "name": "edusketch-voice-lite",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check": "node --check ./src/app.js && node --check ./server/llm-proxy.mjs",
+    "test": "node ./tests/smoke.mjs",
+    "serve": "node ./server/llm-proxy.mjs",
+    "serve:static": "python -m http.server 5173 --bind 127.0.0.1"
+  }
+}
