@@ -1,3 +1,5 @@
+视频演示链接：【演示视频】 https://www.bilibili.com/video/BV13bJG6rEyT/?share_source=copy_web&vd_source=22e31a9cad3f873aed4406ab9272ea13
+
 # VoiceCanvas Lite
 
 VoiceCanvas Lite 是一个纯语音控制的 AI 绘图白板。用户无需鼠标和键盘，只需说出一个简单、自然、甚至有点模糊的绘图意图，系统就会通过本地模板和大模型语义扩展，把语音转换成结构化绘图动作，并在 Canvas 上生成完整图示。
